@@ -1,0 +1,30 @@
+version: "3"
+services:
+  c1:
+    build: .
+    # We're using the following command to bring up erlang shell
+    # for the example purposes, but in the other case the command
+    # will describe a running container
+    command: erl -noshell -name app@host1.com -setcookie cookie
+    #command: erlc genere.erl mapreduce.erl primos.erl readfile.erl servidor.erl simple.erl
+    container_name: host1.com
+    volumes: 
+      - .:/app
+    networks:
+      - net1
+
+  c2:
+    build: .
+    command: erl -noshell -name app@host2.com -setcookie cookie 
+    #command: erlc genere.erl mapreduce.erl primos.erl readfile.erl servidor.erl simple.erl
+    container_name: host2.com
+    volumes: 
+      - .:/app
+    networks:
+     - net1
+
+# We're using custom network setup, as it ships with a DNS
+# system which allows containers to communicate by hostnames.
+networks:
+  net1:
+    driver: bridge
