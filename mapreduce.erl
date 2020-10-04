@@ -16,9 +16,9 @@ jefe(ModuloTrabajo, SpecTrabajo, SpecLotes, Cliente) ->
 
     {ListaTrabajadores, NumTrabajadores} = get_trabajadores(SpecTrabajo),
 
-    Llaves     = ModuloTrabajo:gen_keys(SpecLotes),
-    Repartidor = spawn_link(fun() -> repartidor(Llaves, NumTrabajadores) end),
-    Recolector = spawn_link(fun() -> recolector(ModuloTrabajo, length(Llaves), Cliente, []) end),
+    Tuplas     = ModuloTrabajo:gen_keys(SpecLotes), %[{x, Y, Z}, {X, Y, Z}]%
+    Repartidor = spawn_link(fun() -> repartidor(Tuplas, NumTrabajadores) end),
+    Recolector = spawn_link(fun() -> recolector(ModuloTrabajo, length(Tuplas), Cliente, []) end),
     spawn_link(fun() -> spawn_trabajadores(ModuloTrabajo, Repartidor, Recolector, ListaTrabajadores) end).
 
 get_trabajadores(SpecTrabajo) ->
@@ -55,6 +55,8 @@ repartidor([], N) when N > 0 ->
 	    Worker ! no_hay,
 	    repartidor([], N-1)
     end;
+
+%[{x, Y, Z}, {X, Y, Z}]%
 repartidor([Llave|Llaves], NumTrabajadores) ->
     receive
 	{Worker, mas_trabajo} ->
@@ -65,11 +67,14 @@ repartidor([Llave|Llaves], NumTrabajadores) ->
 % Recolector ----------------------------------------------------------
 recolector(Trabajo, 0, Cliente, Lotes) ->
     io:format("recolector termino, enviando paquete al Cliente\n"),
+    % Result = ,
+    % io:format("En recolector ~p", [Result]),
     Cliente ! {pedido, Trabajo:reduce(Lotes)};
 recolector(Trabajo, Pendientes, Cliente, Lotes) when Pendientes > 0 ->
     receive
 	{Llave, Lote} ->
-	    recolector(Trabajo, Pendientes-1, Cliente, [{Llave, Lote}| Lotes])
+        {X, _, _} = Llave,
+	    recolector(Trabajo, Pendientes-1, Cliente, [{X, Lote}| Lotes])
     end.
 
 % Trabajador ----------------------------------------------------------
@@ -77,7 +82,7 @@ trabajador(Trabajo, Repartidor, Recolector) ->
     Repartidor ! {self(), mas_trabajo},
     receive
 	no_hay -> finished;
-	Llave  ->
+	Llave  -> %{X, Y, Z}%
 	    Recolector ! {Llave, Trabajo:map(Llave)},
 	    trabajador(Trabajo, Repartidor, Recolector)
     end.
