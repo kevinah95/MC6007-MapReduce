@@ -14,8 +14,7 @@ defmodule MapReduce do
 
   """
   def map_list(list) do
-    map = Enum.map(list, fn x -> {elem(x, 0), elem(x, 1) + elem(x, 2)} end)
-    map |> List.keysort(0)
+    Enum.map(list, fn x -> {elem(x, 0), elem(x, 1) + elem(x, 2)} end)
   end
 
   @doc """
