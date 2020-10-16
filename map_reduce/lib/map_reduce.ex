@@ -1,6 +1,11 @@
 defmodule MapReduce do
   @moduledoc """
   Documentation for `MapReduce`.
+
+  ## Examples
+      iex> MapReduce.read_file()\
+      iex> |>MapReduce.map_list \
+      iex> |>MapReduce.reduce_list(%{})
   """
 
   @doc """
@@ -23,7 +28,7 @@ defmodule MapReduce do
   ## Examples
 
       iex> list = [{1, 1665}, {1, 1514}, {10, 588}]
-      iex> MapReduce.reduce_list(a, %{})
+      iex> MapReduce.reduce_list(list, %{})
       %{1 => 3179, 10 => 588}
 
   """
