@@ -1,24 +1,23 @@
 defmodule Primes do
-
   @doc """
   ## Examples
     iex(12)> Primes.gen_keys({4,100})
     [{59, 82}, {40, 58}, {21, 39}, {2, 20}]
   """
-  def gen_keys({num_strips,maximum}), do: gen_strips(2, maximum, 0, num_strips, [])
+  def gen_keys({num_strips, maximum}), do: gen_strips(2, maximum, 0, num_strips, [])
 
   defp gen_strips(_, _, num_strips, num_strips, result), do: result
 
   defp gen_strips(i, max, strip, num_strips, result) do
-    reminder  = rem(max-2, num_strips)
+    reminder = rem(max - 2, num_strips)
 
+    sixe =
+      case strip <= reminder do
+        true -> div(max - 2, num_strips + 1)
+        false -> div(max - 2, num_strips)
+      end
 
-    sixe = case strip <= reminder do
-      true -> div(max - 2, num_strips + 1)
-      false -> div(max-2, num_strips)
-    end
-
-    gen_strips(i+sixe, max, strip+1, num_strips, [{i,i+sixe-1}|result])
+    gen_strips(i + sixe, max, strip + 1, num_strips, [{i, i + sixe - 1} | result])
   end
 
   @doc """
@@ -34,8 +33,8 @@ defmodule Primes do
 
   defp gen_primes(i, max, primes) do
     case is_prime(i) do
-      true -> gen_primes(i+1, max, [i|primes])
-      false -> gen_primes(i+1, max, primes)
+      true -> gen_primes(i + 1, max, [i | primes])
+      false -> gen_primes(i + 1, max, primes)
     end
   end
 
@@ -47,7 +46,7 @@ defmodule Primes do
     if rem(num, i) == 0 do
       false
     else
-      is_prime(i+1, sqrt, num)
+      is_prime(i + 1, sqrt, num)
     end
   end
 
@@ -58,6 +57,6 @@ defmodule Primes do
   """
 
   def reduce(list) do
-    Enum.reduce(list, [], fn(x, acc) -> [elem(x,0) | acc] end)
+    Enum.reduce(list, [], fn x, acc -> [elem(x, 0) | acc] end)
   end
 end

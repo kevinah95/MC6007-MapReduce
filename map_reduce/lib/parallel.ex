@@ -15,19 +15,19 @@ defmodule Parallel do
 
   def jefe(module_work, spec_work, spec_lotes, client) do
     {list_of_workers, num_workers} = get_trabajadores(spec_work)
-
-    llaves     = module_work.gen_keys(spec_lotes)
+    # TODO: change spec_work to work with generator
+    llaves = module_work.read_file() |> Enum.chunk_every(num_workers)
     repartidor = spawn_link(fn -> repartidor(llaves, num_workers) end)
     recolector = spawn_link(fn -> recolector(module_work, length(llaves), client, []) end)
     spawn_link(fn -> spawn_trabajadores(module_work, repartidor, recolector, list_of_workers) end)
-
   end
 
   def get_trabajadores(spec_work) do
     list_of_workers = lista_trabajadores(spec_work)
 
-    num_workers = list_of_workers |> Enum.reduce([], fn(x, acc) -> [elem(x,1) | acc] end) \
-                    |> Enum.sum
+    num_workers =
+      list_of_workers |> Enum.reduce([], fn x, acc -> [elem(x, 1) | acc] end) |> Enum.sum()
+
     {list_of_workers, num_workers}
   end
 
@@ -43,11 +43,11 @@ defmodule Parallel do
     end)
   end
 
-  def crear_trabajadores_nodo({_,0}, _, _, _), do: :ok
+  def crear_trabajadores_nodo({_, 0}, _, _, _), do: :ok
 
   def crear_trabajadores_nodo({host, n}, work, repartidor, recolector) when n > 0 do
-      Node.spawn_link(host, __MODULE__, :worker, [work, repartidor, recolector])
-      crear_trabajadores_nodo({host, n-1}, work, repartidor, recolector)
+    Node.spawn_link(host, __MODULE__, :worker, [work, repartidor, recolector])
+    crear_trabajadores_nodo({host, n - 1}, work, repartidor, recolector)
   end
 
   def repartidor([], 0) do
@@ -59,15 +59,18 @@ defmodule Parallel do
     receive do
       {:mas_trabajo, worker} ->
         send(worker, :no_hay)
-        repartidor([], n-1)
+        repartidor([], n - 1)
     end
   end
 
-  def repartidor([llave|llaves], num_workers) do
+  def repartidor([llave | llaves], num_workers) do
     receive do
-	    {:mas_trabajo, worker} ->
-	      send(worker, llave)
-	      repartidor(llaves, num_workers)
+      {:mas_trabajo, worker} ->
+        # IO.puts("LLAVE")
+        # IO.inspect(llave)
+        # IO.inspect(worker)
+        send(worker, llave)
+        repartidor(llaves, num_workers)
     end
   end
 
@@ -79,24 +82,29 @@ defmodule Parallel do
   """
   def recolector(work, 0, client, lotes) do
     :io.format("recolector termino, enviando paquete al client\n")
-    send(client, {:pedido, work.reduce(lotes)})
+    # IO.inspect lotes
+    send(client, {:pedido, work.reduce_list(lotes, %{})})
   end
 
   def recolector(work, pendientes, client, lotes) when pendientes > 0 do
     receive do
-      {llave, lote} ->
-          recolector(work, pendientes-1, client, [{llave, lote}| lotes])
+      chunk ->
+        # IO.puts("CHUNK")
+        # IO.inspect lotes
+        recolector(work, pendientes - 1, client, chunk ++ lotes)
     end
   end
 
   def worker(work, repartidor, recolector) do
     send(repartidor, {:mas_trabajo, self()})
+
     receive do
-      :no_hay -> :finished
-      llave  ->
-        send(recolector, {llave, work.map(llave)})
+      :no_hay ->
+        :finished
+
+      llave ->
+        send(recolector, work.map_list(llave))
         worker(work, repartidor, recolector)
     end
   end
-
 end
