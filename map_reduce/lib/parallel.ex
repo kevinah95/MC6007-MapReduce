@@ -1,4 +1,5 @@
 defmodule Parallel do
+  use GenServer
   @doc """
   ## Examples
 
@@ -82,8 +83,10 @@ defmodule Parallel do
   """
   def recolector(work, 0, client, lotes) do
     :io.format("recolector termino, enviando paquete al client\n")
-    # IO.inspect lotes
+    #IO.inspect lotes
     send(client, {:pedido, work.reduce_list(lotes, %{})})
+    #grouped = Enum.group_by(lotes, fn {a, _} -> a end, &elem(&1, 1))
+
   end
 
   def recolector(work, pendientes, client, lotes) when pendientes > 0 do
@@ -106,5 +109,22 @@ defmodule Parallel do
         send(recolector, work.map_list(llave))
         worker(work, repartidor, recolector)
     end
+  end
+
+  @impl true
+  def init(default) do
+    {:ok, default}
+  end
+
+  @impl true
+  def handle_cast({:inicio, module, num_nodos, client}, state) do
+    start(module, num_nodos, {0}, client)
+    {:noreply, state}
+  end
+
+  @impl true
+  def handle_info({:pedido, list}, state) do
+    IO.inspect list
+    {:noreply, state}
   end
 end
