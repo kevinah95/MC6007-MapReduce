@@ -1,5 +1,21 @@
 defmodule Parallel do
   use GenServer
+
+  @doc """
+  Starts the registry.
+  """
+  def start_link(opts) do
+    GenServer.start_link(__MODULE__, [], opts)
+  end
+
+  def send(server_pid, module_name, num_nodos) do
+    GenServer.cast(server_pid, {:inicio, module_name, num_nodos, server_pid})
+  end
+
+  def receive(server_pid) do
+    GenServer.call(server_pid, {:pedido})
+  end
+
   @doc """
   ## Examples
 
@@ -10,11 +26,11 @@ defmodule Parallel do
     repartidor termino
     #PID<0.149.0>
   """
-  def start(module_work, spec_work, num_batches, client) do
-    jefe(module_work, spec_work, num_batches, client)
+  def start(module_work, spec_work, client) do
+    jefe(module_work, spec_work, client)
   end
 
-  def jefe(module_work, spec_work, spec_lotes, client) do
+  def jefe(module_work, spec_work, client) do
     {list_of_workers, num_workers} = get_trabajadores(spec_work)
     # TODO: change spec_work to work with generator
     llaves = module_work.read_file() |> Enum.chunk_every(num_workers)
@@ -118,13 +134,14 @@ defmodule Parallel do
 
   @impl true
   def handle_cast({:inicio, module, num_nodos, client}, state) do
-    start(module, num_nodos, {0}, client)
+    start(module, num_nodos, client)
     {:noreply, state}
   end
 
   @impl true
   def handle_info({:pedido, list}, state) do
     IO.inspect list
+    IO.puts("Hola")
     {:noreply, state}
   end
 end
