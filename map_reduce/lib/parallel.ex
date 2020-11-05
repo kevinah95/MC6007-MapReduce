@@ -137,7 +137,6 @@ defmodule Parallel do
   @impl true
   def handle_info({:pedido, list}, state) do
     IO.inspect list
-    IO.puts("Hola")
     {:noreply, state}
   end
 end
