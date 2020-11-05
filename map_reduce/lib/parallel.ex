@@ -12,10 +12,6 @@ defmodule Parallel do
     GenServer.cast(server_pid, {:inicio, module_name, num_nodos, server_pid})
   end
 
-  def receive(server_pid) do
-    GenServer.call(server_pid, {:pedido})
-  end
-
   @doc """
   ## Examples
 

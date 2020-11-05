@@ -43,6 +43,6 @@ defmodule MapReduce do
 
   def read_file() do
     stream = File.stream!("tuples.data")
-    stream |> Enum.map(&elem(Code.eval_string(&1), 0))
+    stream |> Stream.map(&elem(Code.eval_string(&1), 0))
   end
 end
