@@ -15,7 +15,7 @@ defmodule Parallel do
   @doc """
   ## Examples
 
-    iex(1)> Parallel.start(Primes, 10, {10, 100}, self())
+    iex(1)> Parallel.start(Primes, 10, self())
 
     generando 10 trabajadores en el nodo foo@khernandezr
     recolector termino, enviando paquete al client
