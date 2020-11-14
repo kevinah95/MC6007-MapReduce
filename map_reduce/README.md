@@ -41,3 +41,5 @@ iex(1)> Generator.tuples(100, 10, "tuples.data")
 iex(nodoB@host)> {:ok, pid} = GenServer.start_link(Parallel, [])
 iex(nodoB@host)> GenServer.cast(pid, {:inicio, MapReduce, [{:nodoA@host, 2}], pid})
 ```
+### Pagerank
+Pagerank.read_file() |> Stream.chunk_every(1) |> Stream.map(&(Pagerank.calculate_eigenvector_prime(Enum.at(&1, 0), Pagerank.read_eigenvector_file()))) |> Enum.to_list 
