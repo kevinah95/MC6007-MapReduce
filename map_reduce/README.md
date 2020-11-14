@@ -21,10 +21,23 @@ be found at [https://hexdocs.pm/map_reduce](https://hexdocs.pm/map_reduce).
 
 ## Usage
 
+### Crear dos nodos
 ```bash
-iex -S mix
+iex --sname nodoA --cookie secret_token -S mix 
+iex --sname nodoB --cookie secret_token -S mix 
 ```
 
+### Generar tuplas
+
+Por ejemplo 100 líneas con números del 1 a n, en este caso 10:
+
 ```bash
-iex(1)> Generator.tuples(10, 10, "tuples.data")
+iex(1)> Generator.tuples(100, 10, "tuples.data")
+```
+
+### Crear el servidor 
+
+```bash
+iex(nodoB@host)> {:ok, pid} = GenServer.start_link(Parallel, [])
+iex(nodoB@host)> GenServer.cast(pid, {:inicio, MapReduce, [{:nodoA@host, 2}], pid})
 ```
