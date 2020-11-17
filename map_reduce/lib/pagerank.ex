@@ -21,6 +21,9 @@ defmodule Pagerank do
     r * beta + dp
   end
 
+  def reduceV2(v, beta, dp) do
+    r = Enum.map(v,fn e -> e |> Enum.sum |> Kernel.*(beta) |> Kernel.+(dp)  end)
+  end
 
   def read_file() do
     stream = File.stream!("m.rank")

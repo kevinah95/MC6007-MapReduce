@@ -43,3 +43,7 @@ iex(nodoB@host)> GenServer.cast(pid, {:inicio, MapReduce, [{:nodoA@host, 2}], pi
 ```
 ### Pagerank
 Pagerank.read_file() |> Stream.chunk_every(1) |> Stream.map(&(Pagerank.calculate_eigenvector_prime(Enum.at(&1, 0), Pagerank.read_eigenvector_file()))) |> Enum.to_list 
+
+
+{:ok, pid} = GenServer.start_link(ParallelV2, [])
+GenServer.cast(pid, {:inicio, Pagerank, [{:nodoA@khernandezr, 1}], pid})
