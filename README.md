@@ -25,5 +25,7 @@ iex(nodoB@host)> GenServer.cast(pid, {:inicio, MapReduce, [{:nodoA@host, 2}], pi
 
 ### Pagerank
 
+```bash
 {:ok, pid} = GenServer.start_link(ParallelV2, [])
 GenServer.cast(pid, {:inicio, Pagerank, [{:nodoA@host, 1}], pid})
+```
